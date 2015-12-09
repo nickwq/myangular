@@ -66,7 +66,7 @@ describe('Scope', function(){
 
             scope.$watch(
                 function(){ return undefined;},
-                function(newValue, oldValue, scope){ scope.counter++}
+                function(newValue, oldValue, scope){ scope.counter++;}
             );
 
             scope.$digest();
@@ -84,6 +84,73 @@ describe('Scope', function(){
 
             scope.$digest();
             expect(oldValueGiven).toBe(123);
+        });
+
+        it('may have watchers that omit the listener function', function () {
+            var watchFn = jasmine.createSpy().and.returnValue('something');
+            scope.$watch(watchFn);
+
+            scope.$digest();
+            expect(watchFn).toHaveBeenCalled();
+        });
+
+        it('triggered chained watchers in the same digest', function () {
+            scope.name = 'Jane';
+            scope.$watch(
+                function (scope) {
+                    return scope.nameUpper;
+                },
+                function (newValue, oldValue, scope) {
+                    if(newValue){
+                        scope.initial = newValue.substring(0,1) + '.';
+                    }
+                }
+            );
+
+            scope.$watch(
+                function (scope) {
+                    return scope.name;
+                },
+                function (newValue, oldValue, scope) {
+                    if(newValue){
+                        scope.nameUpper = newValue.toUpperCase();
+                    }
+                }
+            );
+
+            scope.$digest();
+            expect(scope.initial).toBe('J.');
+
+            scope.name = 'Bob';
+            scope.$digest();
+            expect(scope.initial).toBe('B.');
+        });
+
+        it('give up on the watchers after 10 times', function () {
+            scope.counter = 0;
+            scope.someValue = 0;
+
+            scope.$watch(
+                function (scope) {
+                    return scope.someValue;
+                },
+                function (newValue, oldValue, scope) {
+                    scope.someValue++;
+                    scope.counter++;
+                }
+            );
+
+            scope.$watch(
+                function (scope) {
+                    return scope.someValue;
+                },
+                function (newValue, oldValue, scope) {
+                    scope.someValue++;
+                    scope.counter++;
+                }
+            );
+
+            expect(scope.$digest).toThrow();
         });
     });
 });
