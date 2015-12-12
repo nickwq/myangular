@@ -5,7 +5,9 @@
     "globals": {
         "jasmine": false,
         "describe": false,
+        "ddescribe": false,
         "it": false,
+        "iit": false,
         "expect": false,
         "beforeEach": false,
         "afterEach": false
