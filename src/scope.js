@@ -23,7 +23,9 @@ Scope.prototype.$watch = function (watchFn, listenerFn, valueEq) {
 
 Scope.prototype.$$areEqual = function (newValue, oldValue, valueEqual) {
     if (!valueEqual) {
-        return newValue === oldValue;
+        return newValue === oldValue ||
+            (typeof newValue === 'number' && typeof oldValue === 'number' &&
+            isNaN(newValue) && isNaN(oldValue));
     }
     else {
         return _.isEqual(newValue, oldValue);
