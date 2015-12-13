@@ -21,11 +21,13 @@ Scope.prototype.$watch = function (watchFn, listenerFn, valueEq) {
     this.$$lastDirtyWatch = null;
 };
 
-Scope.prototype.$$areEqual = function(newValue, oldValue, valueEqual){
-  if(!valueEqual) {return newValue === oldValue;}
-    else{
-      return _.isEqual(newValue, oldValue);
-  }
+Scope.prototype.$$areEqual = function (newValue, oldValue, valueEqual) {
+    if (!valueEqual) {
+        return newValue === oldValue;
+    }
+    else {
+        return _.isEqual(newValue, oldValue);
+    }
 };
 
 Scope.prototype.$$digestOnce = function () {
@@ -44,8 +46,7 @@ Scope.prototype.$$digestOnce = function () {
 
             dirty = true;
         }
-        else if( self.$$lastDirtyWatch === watcher)
-        {
+        else if (self.$$lastDirtyWatch === watcher) {
             return false;
         }
     });
