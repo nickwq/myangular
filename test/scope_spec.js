@@ -271,11 +271,57 @@ describe('Scope', function () {
         it('passed the second $eval argument straight through', function () {
             scope.aValue = 42;
 
-            var result = scope.$eval(function(scope, arg){
-               return scope.aValue + arg;
+            var result = scope.$eval(function (scope, arg) {
+                return scope.aValue + arg;
             }, 2);
 
             expect(result).toBe(44);
+        });
+
+        it("executes $apply'ed function and starts the digest", function () {
+            scope.aValue = 42;
+            scope.counter = 0;
+
+            scope.$watch(
+                function (scope) {
+                    return scope.aValue;
+                },
+                function (newValue, oldValue, scope) {
+                    scope.counter++;
+                }
+            );
+
+            scope.$digest();
+            expect(scope.counter).toBe(1);
+
+            scope.$apply(function (scope) {
+                scope.aValue = "otherValue";
+            });
+
+            expect(scope.counter).toBe(2);
+        });
+
+        it("executes $evalAsync'ed function later in the same cycle", function () {
+            scope.aValue = [1, 2, 3];
+            scope.asyncEvaluated = false;
+            scope.asyncEvaluatedImmediately = false;
+
+            scope.$watch(
+                function (scope) {
+                    return scope.aValue;
+                },
+                function (newValue, oldValue, scope) {
+                    scope.$evalAsync(function (scope) {
+                        scope.asyncEvaluated = true;
+                    });
+
+                    scope.asyncEvaluatedImmediately = scope.asyncEvaluated;
+                }
+            );
+            scope.$digest();
+            expect(scope.asyncEvaluated).toBe(true);
+            expect(scope.asyncEvaluatedImmediately).toBe(false);
+
         });
     });
 });

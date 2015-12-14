@@ -4,6 +4,7 @@ var _ = require('lodash');
 function Scope() {
     this.$$watchers = [];
     this.$$lastDirtyWatch = null;
+    this.$$asyncQueue = [];
 }
 
 function initWacthVal() {
@@ -21,8 +22,20 @@ Scope.prototype.$watch = function (watchFn, listenerFn, valueEq) {
     this.$$lastDirtyWatch = null;
 };
 
-Scope.prototype.$eval = function(expr, locals){
-  return expr(this, locals);
+Scope.prototype.$eval = function (expr, locals) {
+    return expr(this, locals);
+};
+
+Scope.prototype.$apply = function (expr) {
+    try{
+        this.$eval(expr);
+    } finally {
+        this.$digest();
+    }
+};
+
+Scope.prototype.$evalAsync = function (expr) {
+    this.$$asyncQueue.push({scope: this, expression: expr});
 };
 
 Scope.prototype.$$areEqual = function (newValue, oldValue, valueEqual) {
@@ -65,6 +78,10 @@ Scope.prototype.$digest = function () {
     this.$$lastDirtyWatch = null;
 
     do {
+        while(this.$$asyncQueue.length){
+            var asyncTask = this.$$asyncQueue.shift();
+            asyncTask.scope.$eval(asyncTask.expression);
+        }
         dirty = this.$$digestOnce();
         if (dirty && !(TTL--)) throw "exceed 10 times";
         TTL++;
