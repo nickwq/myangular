@@ -3,7 +3,7 @@
 var Scope = require('../src/scope');
 var _ = require('lodash');
 
-describe('Scope', function(){
+describe('Scope', function () {
 
     it('can be constructed and use as an object', function () {
         var scope = new Scope();
@@ -11,15 +11,15 @@ describe('Scope', function(){
         expect(scope.aProperty).toBe(1);
     });
 
-    describe('digest', function(){
-       var scope;
+    describe('digest', function () {
+        var scope;
 
-        beforeEach(function(){
-           scope = new Scope();
+        beforeEach(function () {
+            scope = new Scope();
         });
 
         it('calls the listener function of a watch on first $digest', function () {
-            var watchFn = function(){
+            var watchFn = function () {
                 return 'wat';
             };
             var listenerFn = jasmine.createSpy();
@@ -31,7 +31,8 @@ describe('Scope', function(){
 
         it('calls the watch function with scope as the the argument', function () {
             var watchFn = jasmine.createSpy();
-            var listenerFn = function(){};
+            var listenerFn = function () {
+            };
             scope.$watch(watchFn, listenerFn);
             scope.$digest();
 
@@ -43,8 +44,12 @@ describe('Scope', function(){
             scope.counter = 0;
 
             scope.$watch(
-                function(scope){ return scope.someValue;},
-                function(newValue, oldValue, scope){ scope.counter++;}
+                function (scope) {
+                    return scope.someValue;
+                },
+                function (newValue, oldValue, scope) {
+                    scope.counter++;
+                }
             );
 
             expect(scope.counter).toBe(0);
@@ -66,8 +71,12 @@ describe('Scope', function(){
             scope.counter = 0;
 
             scope.$watch(
-                function(){ return undefined;},
-                function(newValue, oldValue, scope){ scope.counter++;}
+                function () {
+                    return undefined;
+                },
+                function (newValue, oldValue, scope) {
+                    scope.counter++;
+                }
             );
 
             scope.$digest();
@@ -79,8 +88,12 @@ describe('Scope', function(){
             var oldValueGiven;
 
             scope.$watch(
-                function(scope){ return scope.someValue;},
-                function(newValue, oldValue, scope){ oldValueGiven = oldValue;}
+                function (scope) {
+                    return scope.someValue;
+                },
+                function (newValue, oldValue, scope) {
+                    oldValueGiven = oldValue;
+                }
             );
 
             scope.$digest();
@@ -102,8 +115,8 @@ describe('Scope', function(){
                     return scope.nameUpper;
                 },
                 function (newValue, oldValue, scope) {
-                    if(newValue){
-                        scope.initial = newValue.substring(0,1) + '.';
+                    if (newValue) {
+                        scope.initial = newValue.substring(0, 1) + '.';
                     }
                 }
             );
@@ -113,7 +126,7 @@ describe('Scope', function(){
                     return scope.name;
                 },
                 function (newValue, oldValue, scope) {
-                    if(newValue){
+                    if (newValue) {
                         scope.nameUpper = newValue.toUpperCase();
                     }
                 }
@@ -158,16 +171,16 @@ describe('Scope', function(){
             scope.array = _.range(100);
             var watchExecutions = 0;
 
-            _.times(100, function(i){
-               scope.$watch(
-                   function (scope) {
-                       watchExecutions++;
-                       return scope.array[i];
-                   },
-                   function (newValue, oldValue, scope) {
+            _.times(100, function (i) {
+                scope.$watch(
+                    function (scope) {
+                        watchExecutions++;
+                        return scope.array[i];
+                    },
+                    function (newValue, oldValue, scope) {
 
-                   }
-               );
+                    }
+                );
             });
 
             scope.$digest();
@@ -183,7 +196,9 @@ describe('Scope', function(){
             scope.counter = 0;
 
             scope.$watch(
-                function(scope){ return scope.aValue; },
+                function (scope) {
+                    return scope.aValue;
+                },
                 function (newValue, oldValue, scope) {
                     scope.$watch(
                         function (scope) {
@@ -224,7 +239,7 @@ describe('Scope', function(){
         });
 
         it('correctly handles NANs', function () {
-            scope.number = 0/0;
+            scope.number = 0 / 0;
             scope.counter = 0;
 
             scope.$watch(
@@ -241,6 +256,26 @@ describe('Scope', function(){
 
             scope.$digest();
             expect(scope.counter).toBe(1);
+        });
+
+        it("executes $eval'ed funciton and return result", function () {
+            scope.aValue = 42;
+            var result = scope.$eval(function (scope) {
+                return scope.aValue;
+            });
+
+            expect(result).toBe(42);
+
+        });
+
+        it('passed the second $eval argument straight through', function () {
+            scope.aValue = 42;
+
+            var result = scope.$eval(function(scope, arg){
+               return scope.aValue + arg;
+            }, 2);
+
+            expect(result).toBe(44);
         });
     });
 });

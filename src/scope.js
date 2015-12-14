@@ -21,6 +21,10 @@ Scope.prototype.$watch = function (watchFn, listenerFn, valueEq) {
     this.$$lastDirtyWatch = null;
 };
 
+Scope.prototype.$eval = function(expr, locals){
+  return expr(this, locals);
+};
+
 Scope.prototype.$$areEqual = function (newValue, oldValue, valueEqual) {
     if (!valueEqual) {
         return newValue === oldValue ||
