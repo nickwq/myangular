@@ -333,7 +333,7 @@ describe('Scope', function () {
                     if(!scope.asyncEvaluated){
                         scope.$evalAsync(function (scope) {
                             scope.asyncEvaluated = true;
-                        })
+                        });
                     }
 
                     return scope.aValue;
@@ -356,7 +356,7 @@ describe('Scope', function () {
                     if(scope.asyncEvaluatedTimes < 2){
                         scope.$evalAsync(function (scope) {
                             scope.asyncEvaluatedTimes++;
-                        })
+                        });
                     }
                     return scope.aValue;
                 },
@@ -367,6 +367,25 @@ describe('Scope', function () {
             
             scope.$digest();
             expect(scope.asyncEvaluatedTimes).toBe(2);
+        });
+
+        it('eventually halts the $evalAsyncs added by watches', function () {
+            scope.aValue = [1,2,3];
+
+            scope.$watch(
+                function (scope) {
+                    scope.$evalAsync(function (scope) {
+                    });
+                    return scope.aValue;
+                },
+                function (newValue, oldValue, scope) {
+                }
+            );
+
+            expect(function () {
+                scope.$digest();
+            }).toThrow();
+
         });
     });
 });

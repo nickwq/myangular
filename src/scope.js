@@ -83,8 +83,7 @@ Scope.prototype.$digest = function () {
             asyncTask.scope.$eval(asyncTask.expression);
         }
         dirty = this.$$digestOnce();
-        if (dirty && !(TTL--)) throw "exceed 10 times";
-        TTL++;
+        if ((dirty || this.$$asyncQueue.length) && !(TTL--)) throw "exceed 10 times";
     } while (dirty || this.$$asyncQueue.length);
 };
 
