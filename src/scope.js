@@ -85,7 +85,7 @@ Scope.prototype.$digest = function () {
         dirty = this.$$digestOnce();
         if (dirty && !(TTL--)) throw "exceed 10 times";
         TTL++;
-    } while (dirty);
+    } while (dirty || this.$$asyncQueue.length);
 };
 
 module.exports = Scope;
