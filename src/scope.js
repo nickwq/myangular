@@ -5,6 +5,8 @@ function Scope() {
     this.$$watchers = [];
     this.$$lastDirtyWatch = null;
     this.$$asyncQueue = [];
+    this.$$applyAsyncQueue = [];
+    this.$$applyAsyncId = null;
     this.$$phase = null;
 }
 
@@ -39,15 +41,39 @@ Scope.prototype.$apply = function (expr) {
 
 Scope.prototype.$evalAsync = function (expr) {
     var self = this;
-    if(!this.$$phase && !this.$$asyncQueue.length){
+    if (!this.$$phase && !this.$$asyncQueue.length) {
         setTimeout(function () {
-            if(self.$$asyncQueue.length){
+            if (self.$$asyncQueue.length) {
                 self.$digest();
             }
         }, 0);
     }
 
     this.$$asyncQueue.push({scope: this, expression: expr});
+};
+
+Scope.prototype.$applyAsync = function (expr) {
+    var self = this;
+    self.$$applyAsyncQueue.push(function () {
+        self.$eval(expr);
+    });
+
+    if (self.$$applyAsyncId === null) {
+        self.$$applyAsyncId = setTimeout(function () {
+            self.$apply(function () {
+                _.bind(self.$$flushApplyAsync, self);
+            });
+        }, 0);
+    }
+
+};
+
+Scope.prototype.$$flushApplyAsync = function () {
+    var self = this;
+    while (self.$$applyAsyncQueue.length) {
+        self.$$applyAsyncQueue.shift()();
+    }
+    self.$$applyAsyncId = null;
 };
 
 Scope.prototype.$$areEqual = function (newValue, oldValue, valueEqual) {
@@ -89,6 +115,11 @@ Scope.prototype.$digest = function () {
     var dirty, TTL = 10;
     this.$$lastDirtyWatch = null;
     this.$beginPhase("$digest");
+
+    if(this.$$applyAsyncId){
+        clearTimeout(this.$$applyAsyncId);
+        this.$$flushApplyAsync();
+    }
 
     do {
         while (this.$$asyncQueue.length) {
