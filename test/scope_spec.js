@@ -324,13 +324,13 @@ describe('Scope', function () {
 
         });
 
-        it("executes $evalAsync'ed functions added by watch functions " , function () {
-            scope.aValue = [1,2,3];
+        it("executes $evalAsync'ed functions added by watch functions ", function () {
+            scope.aValue = [1, 2, 3];
             scope.asyncEvaluated = false;
 
             scope.$watch(
-                function(scope){
-                    if(!scope.asyncEvaluated){
+                function (scope) {
+                    if (!scope.asyncEvaluated) {
                         scope.$evalAsync(function (scope) {
                             scope.asyncEvaluated = true;
                         });
@@ -348,12 +348,12 @@ describe('Scope', function () {
         });
 
         it('executes $evalAsync functions even when not dirty', function () {
-            scope.aValue = [1,2,3];
+            scope.aValue = [1, 2, 3];
             scope.asyncEvaluatedTimes = 0;
-            
+
             scope.$watch(
                 function (scope) {
-                    if(scope.asyncEvaluatedTimes < 2){
+                    if (scope.asyncEvaluatedTimes < 2) {
                         scope.$evalAsync(function (scope) {
                             scope.asyncEvaluatedTimes++;
                         });
@@ -364,13 +364,13 @@ describe('Scope', function () {
                 function (newValue, oldValue, scope) {
                 }
             );
-            
+
             scope.$digest();
             expect(scope.asyncEvaluatedTimes).toBe(2);
         });
 
         it('eventually halts the $evalAsyncs added by watches', function () {
-            scope.aValue = [1,2,3];
+            scope.aValue = [1, 2, 3];
 
             scope.$watch(
                 function (scope) {
@@ -389,13 +389,13 @@ describe('Scope', function () {
         });
 
         it('has a $$phase field whose value is the current digest phase', function () {
-            scope.aValue = [1,2,3];
+            scope.aValue = [1, 2, 3];
             scope.phaseInWatchFunction = undefined;
             scope.phaseInListenerFunction = undefined;
             scope.phaseInApplyFunction = undefined;
 
             scope.$watch(
-                function(scope){
+                function (scope) {
                     scope.phaseInWatchFunction = scope.$$phase;
                 },
                 function (newValue, oldValue, scope) {
@@ -423,7 +423,8 @@ describe('Scope', function () {
                 scope.counter++;
             });
 
-            scope.$evalAsync(function(scope){});
+            scope.$evalAsync(function (scope) {
+            });
             expect(scope.counter).toBe(0);
             setTimeout(function () {
                 expect(scope.counter).toBe(1);
@@ -445,7 +446,7 @@ describe('Scope', function () {
             scope.$digest();
             expect(scope.counter).toBe(1);
 
-            scope.$applyAsync(function(scope){
+            scope.$applyAsync(function (scope) {
                 scope.aValue = 'abc';
             });
 
@@ -534,5 +535,44 @@ describe('Scope', function () {
             }, 50);
         });
 
+        it('runs a $$postDigest function after each digest', function () {
+            scope.counter = 0;
+
+            scope.$$postDigest(
+                function () {
+                    scope.counter++;
+                }
+            );
+
+            expect(scope.counter).toBe(0);
+
+            scope.$digest();
+            expect(scope.counter).toBe(1);
+
+            scope.$digest();
+            expect(scope.counter).toBe(1);
+        });
+
+        it('does not include $$postDigest in the digest', function () {
+            scope.aValue = 'original value';
+
+            scope.$$postDigest(function () {
+                scope.aValue = 'changed value';
+            });
+
+            scope.$watch(
+                function (scope) {
+                    return scope.aValue;
+                },
+                function (newValue, oldValue, scope) {
+                    scope.watchedValue = newValue;
+                });
+
+            scope.$digest();
+            expect(scope.watchedValue).toBe('original value');
+
+            scope.$digest();
+            expect(scope.watchedValue).toBe('changed value');
+        });
     });
 });
