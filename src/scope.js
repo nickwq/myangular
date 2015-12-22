@@ -70,9 +70,13 @@ Scope.prototype.$applyAsync = function (expr) {
 };
 
 Scope.prototype.$$flushApplyAsync = function () {
-    var self = this;
-    while (self.$$applyAsyncQueue.length) {
-        self.$$applyAsyncQueue.shift()();
+    while (this.$$applyAsyncQueue.length) {
+        try {
+            this.$$applyAsyncQueue.shift()();
+        }
+        catch (e) {
+            console.error(e);
+        }
     }
     self.$$applyAsyncId = null;
 };
@@ -109,7 +113,7 @@ Scope.prototype.$$digestOnce = function () {
                 return false;
             }
         }
-        catch (e){
+        catch (e) {
             console.error(e);
         }
     });
@@ -122,15 +126,20 @@ Scope.prototype.$digest = function () {
     this.$$lastDirtyWatch = null;
     this.$beginPhase("$digest");
 
-    if(this.$$applyAsyncId){
+    if (this.$$applyAsyncId) {
         clearTimeout(this.$$applyAsyncId);
         this.$$flushApplyAsync();
     }
 
     do {
         while (this.$$asyncQueue.length) {
-            var asyncTask = this.$$asyncQueue.shift();
-            asyncTask.scope.$eval(asyncTask.expression);
+            try {
+                var asyncTask = this.$$asyncQueue.shift();
+                asyncTask.scope.$eval(asyncTask.expression);
+            }
+            catch (e) {
+                console.error(e);
+            }
         }
         dirty = this.$$digestOnce();
         if ((dirty || this.$$asyncQueue.length) && !(TTL--)) {
@@ -141,8 +150,14 @@ Scope.prototype.$digest = function () {
 
     this.$clearPhase();
 
-    while(this.$$postDigestQueue.length){
-        this.$$postDigestQueue.shift()();
+    while (this.$$postDigestQueue.length) {
+        try {
+            this.$$postDigestQueue.shift()();
+        }
+        catch (e) {
+            console.error(e);
+        }
+
     }
 };
 

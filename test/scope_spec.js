@@ -627,5 +627,37 @@ describe('Scope', function () {
 
 
         });
+
+        it('catches exceptions in $applyAsync', function (done) {
+            scope.$applyAsync(function(scope){
+                throw "error";
+            });
+            scope.$applyAsync(function (scope) {
+                throw "error";
+            });
+            scope.$applyAsync(function (scope) {
+                scope.applied = true;
+            });
+
+            setTimeout(function () {
+                expect(scope.applied).toBe(true);
+                done();
+            }, 50);
+        });
+
+        it('catches exceptions in $$postDigest', function () {
+            var didRun = false;
+            
+            scope.$$postDigest(function (scope) {
+                throw "error";
+            });
+            scope.$$postDigest(function () {
+                didRun = true;
+            });
+            
+            scope.$digest();
+            expect(didRun).toBe(true);
+            
+        });
     });
 });
