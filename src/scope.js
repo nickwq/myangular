@@ -15,6 +15,7 @@ function initWacthVal() {
 }
 
 Scope.prototype.$watch = function (watchFn, listenerFn, valueEq) {
+    var self = this;
     var watcher = {
         watchFn: watchFn,
         listenerFn: listenerFn || function () {
@@ -22,8 +23,15 @@ Scope.prototype.$watch = function (watchFn, listenerFn, valueEq) {
         valueEq: !!valueEq,
         last: initWacthVal
     };
-    this.$$watchers.push(watcher);
-    this.$$lastDirtyWatch = null;
+    self.$$watchers.unshift(watcher);
+    self.$$lastDirtyWatch = null;
+
+    return function () {
+        var index = self.$$watchers.indexOf(watcher);
+        if(index >= 0){
+            self.$$watchers.splice(index, 1);
+        }
+    }
 };
 
 Scope.prototype.$eval = function (expr, locals) {
@@ -95,7 +103,7 @@ Scope.prototype.$$areEqual = function (newValue, oldValue, valueEqual) {
 Scope.prototype.$$digestOnce = function () {
     var self = this;
     var newValue, oldValue, dirty;
-    _.forEach(this.$$watchers, function (watcher) {
+    _.forEachRight(this.$$watchers, function (watcher) {
 
         try {
             newValue = watcher.watchFn(self);
