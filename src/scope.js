@@ -32,7 +32,22 @@ Scope.prototype.$watch = function (watchFn, listenerFn, valueEq) {
             self.$$watchers.splice(index, 1);
             self.$$lastDirtyWatch = null;
         }
-    }
+    };
+};
+
+Scope.prototype.$watchGroup = function(watchFns, listenerFn){
+    var self = this;
+    var newValues = new Array(watchFns.length);
+    var oldValues = new Array(watchFns.length);
+
+    _.forEach(watchFns, function (watchFn, i) {
+       self.$watch(watchFn, function(newvalue, oldValue){
+           newValues[i] = newvalue;
+           oldValues[i] = oldValue;
+           listenerFn(newValues, oldValues, self);
+       });
+    });
+
 };
 
 Scope.prototype.$eval = function (expr, locals) {
