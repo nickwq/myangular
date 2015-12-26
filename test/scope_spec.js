@@ -794,5 +794,23 @@ describe('Scope', function () {
             expect(gotNewValues).toEqual([1,2]);
             expect(gotOldValues).toEqual([1, 2]);
         });
+
+        it('use differnet arrays for old and new values on subsequent runs', function () {
+            var gotNewValues, gotOldValues;
+            scope.aValue = 1;
+            scope.anotherValue = 2;
+            scope.$watchGroup([
+                function(scope) { return scope.aValue; },
+                function(scope) { return scope.anotherValue; }
+            ], function(newValues, oldValues, scope) {
+                gotNewValues = newValues;
+                gotOldValues = oldValues;
+            });
+            scope.$digest();
+            scope.anotherValue = 3;
+            scope.$digest();
+            expect(gotNewValues).toEqual([1, 3]);
+            expect(gotOldValues).toEqual([1, 2]);
+        });
     });
 });

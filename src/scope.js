@@ -39,12 +39,28 @@ Scope.prototype.$watchGroup = function(watchFns, listenerFn){
     var self = this;
     var newValues = new Array(watchFns.length);
     var oldValues = new Array(watchFns.length);
+    var changeReactionScheduled = false;
+    var firstRun = true;
+
+    function watchGroupListener(){
+        if(firstRun){
+            firstRun = false;
+            listenerFn(newValues, oldValues, self);
+        }else{
+            listenerFn(newValues, oldValues, self);
+        }
+        changeReactionScheduled = false;
+    }
 
     _.forEach(watchFns, function (watchFn, i) {
-       self.$watch(watchFn, function(newvalue, oldValue){
-           newValues[i] = newvalue;
+       self.$watch(watchFn, function(newValue, oldValue){
+           newValues[i] = newValue;
            oldValues[i] = oldValue;
-           listenerFn(newValues, oldValues, self);
+
+           if(!changeReactionScheduled){
+               changeReactionScheduled = true;
+               self.$eval(watchGroupListener);
+           }
        });
     });
 
