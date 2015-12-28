@@ -28,24 +28,24 @@ Scope.prototype.$watch = function (watchFn, listenerFn, valueEq) {
 
     return function () {
         var index = self.$$watchers.indexOf(watcher);
-        if(index >= 0){
+        if (index >= 0) {
             self.$$watchers.splice(index, 1);
             self.$$lastDirtyWatch = null;
         }
     };
 };
 
-Scope.prototype.$watchGroup = function(watchFns, listenerFn){
+Scope.prototype.$watchGroup = function (watchFns, listenerFn) {
     var self = this;
     var newValues = new Array(watchFns.length);
     var oldValues = new Array(watchFns.length);
     var changeReactionScheduled = false;
     var firstRun = true;
 
-    if(watchFns.length === 0){
+    if (watchFns.length === 0) {
         var shouldCall = true;
         self.$evalAsync(function () {
-            if(shouldCall) {
+            if (shouldCall) {
                 listenerFn(newValues, newValues, self);
             }
         });
@@ -54,22 +54,22 @@ Scope.prototype.$watchGroup = function(watchFns, listenerFn){
         };
     }
 
-    function watchGroupListener(){
-        if(firstRun){
+    function watchGroupListener() {
+        if (firstRun) {
             firstRun = false;
             listenerFn(newValues, oldValues, self);
-        }else{
+        } else {
             listenerFn(newValues, oldValues, self);
         }
         changeReactionScheduled = false;
     }
 
-    var destroyFunctions = _.map(watchFns, function(watchFn, i){
+    var destroyFunctions = _.map(watchFns, function (watchFn, i) {
         return self.$watch(watchFn, function (newValue, oldValue) {
             newValues[i] = newValue;
             oldValues[i] = oldValue;
 
-            if(!changeReactionScheduled){
+            if (!changeReactionScheduled) {
                 changeReactionScheduled = true;
                 self.$evalAsync(watchGroupListener);
             }
@@ -155,7 +155,7 @@ Scope.prototype.$$digestOnce = function () {
     _.forEachRight(this.$$watchers, function (watcher) {
 
         try {
-            if(watcher) {
+            if (watcher) {
                 newValue = watcher.watchFn(self);
                 oldValue = watcher.last;
 
@@ -234,5 +234,11 @@ Scope.prototype.$clearPhase = function () {
 
 Scope.prototype.$$postDigest = function (fn) {
     this.$$postDigestQueue.push(fn);
+};
+
+Scope.prototype.$new = function () {
+    var ChildScope = function () {};
+    ChildScope.prototype = this;
+    return new ChildScope();
 };
 module.exports = Scope;

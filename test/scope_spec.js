@@ -732,8 +732,8 @@ describe('Scope', function () {
             );
 
             scope.$watch(function (scope) {
-                return scope.aValue;
-            },
+                    return scope.aValue;
+                },
                 function (newValue, oldValue, scope) {
                     scope.counter++;
                 }
@@ -744,18 +744,20 @@ describe('Scope', function () {
 
         });
 
-        it("allows destroying several $watches during digest", function() {
+        it("allows destroying several $watches during digest", function () {
             scope.aValue = 'abc';
             scope.counter = 0;
             var destroyWatch1 = scope.$watch(
-                function(scope) {
+                function (scope) {
                     destroyWatch1();
                     destroyWatch2();
                 }
             );
             var destroyWatch2 = scope.$watch(
-                function(scope) { return scope.aValue; },
-                function(newValue, oldValue, scope) {
+                function (scope) {
+                    return scope.aValue;
+                },
+                function (newValue, oldValue, scope) {
                     scope.counter++;
                 }
             );
@@ -783,7 +785,7 @@ describe('Scope', function () {
                 }, function (scope) {
                     return scope.anotherValue;
                 }],
-                function(newValues, oldValues, scope){
+                function (newValues, oldValues, scope) {
                     gotNewValues = newValues;
                     gotOldValues = oldValues;
                 }
@@ -791,7 +793,7 @@ describe('Scope', function () {
 
             scope.$digest();
 
-            expect(gotNewValues).toEqual([1,2]);
+            expect(gotNewValues).toEqual([1, 2]);
             expect(gotOldValues).toEqual([1, 2]);
         });
 
@@ -800,9 +802,13 @@ describe('Scope', function () {
             scope.aValue = 1;
             scope.anotherValue = 2;
             scope.$watchGroup([
-                function(scope) { return scope.aValue; },
-                function(scope) { return scope.anotherValue; }
-            ], function(newValues, oldValues, scope) {
+                function (scope) {
+                    return scope.aValue;
+                },
+                function (scope) {
+                    return scope.anotherValue;
+                }
+            ], function (newValues, oldValues, scope) {
                 gotNewValues = newValues;
                 gotOldValues = oldValues;
             });
@@ -855,16 +861,84 @@ describe('Scope', function () {
 
         it('does not call the zero-watch listener when deregistered first', function () {
             var counter = 0;
-            
+
             var destroyGroup = scope.$watchGroup([],
                 function (newValues, oldValues, scope) {
                     counter++;
                 });
-            
+
             destroyGroup();
             scope.$digest();
 
             expect(counter).toEqual(0);
         });
+    });
+
+    describe('inheritance', function () {
+
+        it('inherits the parents properties', function () {
+            var parent = new Scope();
+            parent.aValue = [1, 2, 3];
+
+            var child = parent.$new();
+            expect(child.aValue).toEqual([1, 2, 3]);
+        });
+
+        it('doesnot cause a parent to inherit its properties', function () {
+            var parent = new Scope();
+
+            var child = parent.$new();
+            child.aValue = [1, 2, 3];
+
+            expect(parent.aValue).toBeUndefined();
+        });
+
+        it('inherits the parents properties whenever they are defined', function () {
+            var parent = new Scope();
+            var child = parent.$new();
+
+            parent.aValue = [1, 2, 3];
+
+            expect(child.aValue).toEqual([1, 2, 3]);
+
+        });
+
+        it('can manipulate a parent scopes property', function () {
+            var parent = new Scope();
+            var child = parent.$new();
+
+            parent.aValue = [1, 2, 3];
+
+            child.aValue.push(4);
+
+            expect(child.aValue).toEqual([1, 2, 3, 4]);
+            expect(parent.aValue).toEqual([1, 2, 3, 4]);
+
+        });
+
+        it('can watch a property in the parent', function () {
+            var parent = new Scope();
+            var child = parent.$new();
+
+            parent.aValue = [1, 2, 3];
+            child.counter = 0;
+
+            child.$watch(
+                function (scope) {
+                    return scope.aValue;
+                },
+                function (newValue, oldValue, scope) {
+                    child.counter++;
+                }, true);
+
+            child.$digest();
+            expect(child.counter).toBe(1);
+
+            parent.aValue.push(4);
+            child.$digest();
+            expect(child.counter).toBe(2);
+
+        });
+
     });
 });
