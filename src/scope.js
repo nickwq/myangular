@@ -10,6 +10,7 @@ function Scope() {
     this.$$applyAsyncId = null;
     this.$$postDigestQueue = [];
     this.$$phase = null;
+    this.$root = this;
 }
 
 function initWatchVal() {
@@ -94,7 +95,7 @@ Scope.prototype.$apply = function (expr) {
         return this.$eval(expr);
     } finally {
         this.$clearPhase();
-        this.$digest();
+        this.$root.$digest();
     }
 };
 
@@ -103,7 +104,7 @@ Scope.prototype.$evalAsync = function (expr) {
     if (!this.$$phase && !this.$$asyncQueue.length) {
         setTimeout(function () {
             if (self.$$asyncQueue.length) {
-                self.$digest();
+                self.$root.$digest();
             }
         }, 0);
     }
