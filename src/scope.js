@@ -151,13 +151,13 @@ Scope.prototype.$$areEqual = function (newValue, oldValue, valueEqual) {
     }
 };
 
-Scope.prototype.$$digestOnce = function() {
+Scope.prototype.$$digestOnce = function () {
     var dirty;
     var continueLoop = true;
     var self = this;
-    this.$$everyScope(function(scope) {
+    this.$$everyScope(function (scope) {
         var newValue, oldValue;
-        _.forEachRight(scope.$$watchers, function(watcher) {
+        _.forEachRight(scope.$$watchers, function (watcher) {
             try {
                 if (watcher) {
                     newValue = watcher.watchFn(scope);
@@ -239,10 +239,12 @@ Scope.prototype.$$postDigest = function (fn) {
     this.$$postDigestQueue.push(fn);
 };
 
-Scope.prototype.$new = function () {
+Scope.prototype.$new = function (isIsolated) {
     var ChildScope = function () {
     };
-    ChildScope.prototype = this;
+    if (isIsolated !== true) {
+        ChildScope.prototype = this;
+    }
     var child = new ChildScope();
     this.$$children.push(child);
     child.$$watchers = [];
@@ -250,9 +252,9 @@ Scope.prototype.$new = function () {
     return child;
 };
 
-Scope.prototype.$$everyScope = function(fn) {
+Scope.prototype.$$everyScope = function (fn) {
     if (fn(this)) {
-        return this.$$children.every(function(child) {
+        return this.$$children.every(function (child) {
             return child.$$everyScope(fn);
         });
     } else {
