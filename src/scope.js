@@ -240,12 +240,16 @@ Scope.prototype.$$postDigest = function (fn) {
 };
 
 Scope.prototype.$new = function (isIsolated) {
-    var ChildScope = function () {
-    };
-    if (isIsolated !== true) {
+    var child;
+    if(isIsolated){
+        child = new Scope();
+        child.$root = this.$root;
+    } else {
+        var ChildScope = function(){};
         ChildScope.prototype = this;
+        child = new ChildScope();
     }
-    var child = new ChildScope();
+
     this.$$children.push(child);
     child.$$watchers = [];
     child.$$children = [];
