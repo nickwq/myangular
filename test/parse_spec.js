@@ -49,4 +49,21 @@ describe('parse', function () {
         }).toThrow();
 
     });
+
+    it("can parse a string in single quotes", function () {
+        var fn = parse("'abc'");
+        expect(fn()).toBe('abc');
+    });
+
+    it("can parse a string in double quotes", function () {
+        var fn = parse('"abc"');
+        expect(fn()).toBe('abc');
+    });
+
+    it("will not parse a string with mismatch quotes", function () {
+        expect(function () {
+            parse('"abc\'');
+        }).toThrow();
+
+    });
 });
