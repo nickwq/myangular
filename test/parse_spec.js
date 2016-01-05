@@ -64,6 +64,15 @@ describe('parse', function () {
         expect(function () {
             parse('"abc\'');
         }).toThrow();
+    });
 
+    it("can parse a string with single quotes inside", function () {
+        var fn = parse("'a\\\'b'");
+        expect(fn()).toBe('a\'b');
+    });
+
+    it("can parse a string with double quotes inside", function () {
+        var fn = parse("'a\\\"b'");
+        expect(fn()).toBe('a\"b');
     });
 });
