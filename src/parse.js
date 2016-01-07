@@ -1,7 +1,9 @@
 "use strict";
 var _ = require('lodash');
-var ESCAPES = {'n':'\n', 'f':'\f', 'r':'\r', 't':'\t',
-    'v':'\v', '\'':'\'', '"':'"'};
+var ESCAPES = {
+    'n': '\n', 'f': '\f', 'r': '\r', 't': '\t',
+    'v': '\v', '\'': '\'', '"': '"'
+};
 
 function parse(expr) {
 
@@ -24,12 +26,31 @@ function parse(expr) {
             else if (this.ch === '\'' || this.ch === '"') {
                 this.readString(this.ch);
             }
+            else if (this.isIdent(this.ch)) {
+                this.readIdent();
+            }
             else {
                 throw 'Unexpected next character: ' + this.ch;
             }
         }
 
         return this.tokens;
+    };
+
+    Lexer.prototype.readIdent = function () {
+        var text = '';
+        while (this.index < this.text.length) {
+            var ch = this.text.charAt(this.index);
+            if (this.isIdent(ch) || this.isNumber(ch)) {
+                text += ch;
+            } else {
+                break;
+            }
+            this.index++;
+        }
+
+        var token = {text: text};
+        this.tokens.push(token);
     };
 
     Lexer.prototype.readString = function (quote) {
@@ -39,15 +60,15 @@ function parse(expr) {
         while (this.index < this.text.length) {
             var ch = this.text.charAt(this.index);
 
-            if(escape){
-                if(ch === 'u'){
+            if (escape) {
+                if (ch === 'u') {
                     var hex = this.text.substring(this.index + 1, this.index + 5);
-                    if(!hex.match(/[\da-f]{4}/i)){
+                    if (!hex.match(/[\da-f]{4}/i)) {
                         throw 'Invalid unicode escape';
                     }
                     this.index += 4;
                     string += String.fromCharCode(parseInt(hex, 16));
-                }else {
+                } else {
                     var replacement = ESCAPES[ch];
                     if (replacement) {
                         string += replacement;
@@ -57,15 +78,15 @@ function parse(expr) {
                 }
                 escape = false;
             }
-            else if(ch === quote) {
-                    this.index++;
-                    this.tokens.push({
-                        text: string,
-                        value: string
-                    });
-                    return;
+            else if (ch === quote) {
+                this.index++;
+                this.tokens.push({
+                    text: string,
+                    value: string
+                });
+                return;
 
-            } else if (ch==='\\'){
+            } else if (ch === '\\') {
                 escape = true;
             }
             else {
@@ -119,6 +140,11 @@ function parse(expr) {
         return ch === '-' || ch === '+' || this.isNumber(ch);
     };
 
+    Lexer.prototype.isIdent = function (ch) {
+        return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
+            ch === '_' || ch === '$';
+    };
+
     function AST(lexer) {
         this.lexer = lexer;
     }
@@ -132,10 +158,27 @@ function parse(expr) {
     };
 
     AST.prototype.program = function () {
-        return {type: AST.Program, body: this.constant()};
+        return {type: AST.Program, body: this.primary()};
+    };
+
+    AST.prototype.primary = function () {
+        if (this.constants.hasOwnProperty(this.tokens[0].text)) {
+            return this.constants[this.tokens[0].text];
+        } else {
+            return this.constant();
+        }
     };
     AST.prototype.constant = function () {
         return {type: AST.Literal, value: this.tokens[0].value};
+    };
+    AST.prototype.constant = function () {
+        return {type: AST.Literal, value: this.tokens[0].value};
+    };
+
+    AST.prototype.constants = {
+        'null': {type: AST.Literal, value: null},
+        'true': {type: AST.Literal, value: true},
+        'false': {type: AST.Literal, value: false}
     };
 
     function ASTCompiler(astBuilder) {
@@ -164,7 +207,10 @@ function parse(expr) {
     ASTCompiler.prototype.escape = function (value) {
         if (_.isString(value)) {
             return '\'' + value.replace(this.stringEscapeRegex, this.stringEscapeFn) + '\'';
-        } else {
+        } else if (_.isNull(value)) {
+            return 'null';
+        }
+        else {
             return value;
         }
     };
