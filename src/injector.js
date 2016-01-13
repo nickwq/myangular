@@ -6,6 +6,9 @@ function createInjector(modulesToLoad) {
     var cache = {};
     var $provide = {
         constant: function(key, value){
+            if(key === 'hasOwnProperty'){
+                throw 'hasOwnProperty is not a valid constant name!'
+            }
             cache[key] = value;
         }
     };
@@ -21,6 +24,9 @@ function createInjector(modulesToLoad) {
     return {
         has: function (key) {
             return cache.hasOwnProperty(key);
+        },
+        get: function(key){
+            return cache[key];
         }
     };
 }
