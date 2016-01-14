@@ -43,6 +43,17 @@ describe('injector', function () {
         
         var injector = createInjector(['myModule']);
         expect(injector.get('aConstant')).toBe(42);
-        
+    });
+
+    it("loads multiple modules", function () {
+        var module1 = window.angular.module('myModule', []);
+        var module2 = window.angular.module('myOtherModule', []);
+
+        module1.constant('aConstant', 42);
+        module2.constant('anotherConstant', 43);
+
+        var injector = createInjector(['myModule', 'myOtherModule']);
+        expect(injector.has('aConstant')).toBeTruthy();
+        expect(injector.has('anotherConstant')).toBeTruthy();
     });
 });
