@@ -4,6 +4,7 @@ var _ = require('lodash');
 
 function createInjector(modulesToLoad) {
     var cache = {};
+    var loadedModules = {};
     var $provide = {
         constant: function(key, value){
             if(key === 'hasOwnProperty'){
@@ -14,13 +15,16 @@ function createInjector(modulesToLoad) {
     };
 
     _.forEach(modulesToLoad, function loadModule(moduleName) {
-        var module = window.angular.module(moduleName);
-        _.forEach(module.requires, loadModule);
-        _.forEach(module._invokeQueue, function(invokeArgs){
-            var method = invokeArgs[0];
-            var args = invokeArgs[1];
-            $provide[method].apply($provide, args);
-        });
+        if(!loadedModules.hasOwnProperty(moduleName)){
+            loadedModules[moduleName] = true;
+            var module = window.angular.module(moduleName);
+            _.forEach(module.requires, loadModule);
+            _.forEach(module._invokeQueue, function(invokeArgs){
+                var method = invokeArgs[0];
+                var args = invokeArgs[1];
+                $provide[method].apply($provide, args);
+            });
+        }
     });
     return {
         has: function (key) {
