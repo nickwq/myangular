@@ -14,6 +14,18 @@ function createInjector(modulesToLoad) {
         }
     };
 
+    function invoke(fn){
+        var args = _.map(fn.$inject, function (token) {
+            if(_.isString(token)){
+                return cache[token];
+            } else {
+                throw 'Incorrect injection token! Expected a string, got ' + token;
+            }
+        });
+
+        return fn.apply(null, args);
+    }
+
     _.forEach(modulesToLoad, function loadModule(moduleName) {
         if(!loadedModules.hasOwnProperty(moduleName)){
             loadedModules[moduleName] = true;
@@ -32,7 +44,8 @@ function createInjector(modulesToLoad) {
         },
         get: function(key){
             return cache[key];
-        }
+        },
+        invoke: invoke
     };
 }
 

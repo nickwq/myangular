@@ -40,7 +40,7 @@ describe('injector', function () {
     it("can return a registered constant", function () {
         var module = window.angular.module('myModule', []);
         module.constant('aConstant', 42);
-        
+
         var injector = createInjector(['myModule']);
         expect(injector.get('aConstant')).toBe(42);
     });
@@ -91,5 +91,32 @@ describe('injector', function () {
         window.angular.module('myOtherModule', ['myModule']);
 
         createInjector(['myModule']);
+    });
+
+    it("invokes an annotated function with dependency injection", function () {
+        var module = window.angular.module('myModule', []);
+
+        module.constant('a', 1);
+        module.constant('b', 2);
+        var injector = createInjector(['myModule']);
+
+        var fn = function (one, two) {
+            return one + two;
+        };
+        fn.$inject = ['a', 'b'];
+
+        expect(injector.invoke(fn)).toBe(3);
+    });
+
+    it("does not accept non-strings as injection tokens", function () {
+        var module = window.angular.module('myModule', []);
+        module.constant('a', 1);
+        var injector = createInjector(['myModule']);
+
+        var fn = function(one, two) { return one + two;};
+        fn.$inject = ['a', 2];
+
+        expect(function(){ injector.invoke(fn)}).toThrow();
+
     });
 });
