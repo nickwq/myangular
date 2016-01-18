@@ -14,16 +14,20 @@ function createInjector(modulesToLoad) {
         }
     };
 
-    function invoke(fn){
+    function invoke(fn, self, locals){
         var args = _.map(fn.$inject, function (token) {
             if(_.isString(token)){
-                return cache[token];
+                if(locals && locals.hasOwnProperty(token)){
+                    return locals[token];
+                }else {
+                    return cache[token];
+                }
             } else {
                 throw 'Incorrect injection token! Expected a string, got ' + token;
             }
         });
 
-        return fn.apply(null, args);
+        return fn.apply(self, args);
     }
 
     _.forEach(modulesToLoad, function loadModule(moduleName) {
