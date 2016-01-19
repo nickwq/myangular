@@ -42,6 +42,15 @@ function createInjector(modulesToLoad) {
             });
         }
     });
+
+    function annotate(fn) {
+        if(_.isArray(fn)){
+            return fn.slice(0, fn.length-1);
+        } else if( !fn.$inject) {
+            return [];
+        }
+        return fn.$inject;
+    }
     return {
         has: function (key) {
             return cache.hasOwnProperty(key);
@@ -49,7 +58,8 @@ function createInjector(modulesToLoad) {
         get: function(key){
             return cache[key];
         },
-        invoke: invoke
+        invoke: invoke,
+        annotate: annotate
     };
 }
 
