@@ -201,4 +201,21 @@ describe('annotate', function () {
         expect(injector.annotate(fn)).toEqual(['a', 'c']);
 
     });
+
+    it("strips // comments from argument lists when parsing", function () {
+        var injector = createInjector([]);
+
+        var fn = function(a, //b
+                c ){};
+        expect(injector.annotate(fn)).toEqual(['a', 'c']);
+
+    });
+
+    it("strips surrouding underscores from argument names when parsing", function () {
+        var injector = createInjector([]);
+
+        var fn = function(a, _b_, c_, _d, an_argument){};
+
+        expect(injector.annotate(fn)).toEqual(['a', 'b', 'c', 'd', 'an_argument']);
+    });
 });
