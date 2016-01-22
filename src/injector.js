@@ -7,9 +7,10 @@ var FN_ARG = /^\s*(_?)(\S+?)(_?)\s*$/;
 var STRIP_COMMENTS = /(\/\/.*$)|(\/\*.*?\*\/)/mg;
 
 
-function createInjector(modulesToLoad) {
+function createInjector(modulesToLoad, strictDi) {
     var cache = {};
     var loadedModules = {};
+    strictDi = (strictDi === true);
     var $provide = {
         constant: function(key, value){
             if(key === 'hasOwnProperty'){
@@ -20,7 +21,7 @@ function createInjector(modulesToLoad) {
     };
 
     function invoke(fn, self, locals){
-        var args = _.map(fn.$inject, function (token) {
+        var args = _.map(annotate(fn), function (token) {
             if(_.isString(token)){
                 if(locals && locals.hasOwnProperty(token)){
                     return locals[token];
@@ -31,6 +32,10 @@ function createInjector(modulesToLoad) {
                 throw 'Incorrect injection token! Expected a string, got ' + token;
             }
         });
+
+        if(_.isArray(fn)){
+            fn = _.last(fn);
+        }
 
         return fn.apply(self, args);
     }
@@ -56,6 +61,9 @@ function createInjector(modulesToLoad) {
         } else if (!fn.length) {
             return [];
         } else {
+            if(strictDi){
+                throw 'fn is not using explicit annotation and cannot be invoked in strict mode';
+            }
             var source = fn.toString().replace(STRIP_COMMENTS, '');
             var argDeclaration = source.match(FN_ARGS);
             return _.map(argDeclaration[1].split(','), function(arg){
