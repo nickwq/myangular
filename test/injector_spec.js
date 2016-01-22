@@ -119,7 +119,7 @@ describe('injector', function () {
         fn.$inject = ['a', 2];
 
         expect(function () {
-            injector.invoke(fn)
+            injector.invoke(fn);
         }).toThrow();
 
     });

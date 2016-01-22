@@ -42,10 +42,10 @@ describe('parse', function () {
 
     it("will not parse invalid scientific notation", function () {
         expect(function () {
-            parse('42e-')
+            parse('42e-');
         }).toThrow();
         expect(function () {
-            parse('42e-a')
+            parse('42e-a');
         }).toThrow();
 
     });

@@ -1115,7 +1115,7 @@ describe('Scope', function () {
             parent.counter = 0;
 
             parent.$watch(
-                function(scope){ scope.aValue;},
+                function(scope){ return scope.aValue;},
                 function (newValue, oldValue, scope) {
                     scope.counter++;
                 }

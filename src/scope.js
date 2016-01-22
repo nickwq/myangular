@@ -137,7 +137,7 @@ Scope.prototype.$$flushApplyAsync = function () {
             console.error(e);
         }
     }
-    self.$$applyAsyncId = null;
+    this.$$applyAsyncId = null;
 };
 
 Scope.prototype.$$areEqual = function (newValue, oldValue, valueEqual) {
