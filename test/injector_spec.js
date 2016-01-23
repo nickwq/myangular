@@ -178,7 +178,8 @@ describe('annotate', function () {
 
     it("returns an empty array for a non-annotated 0-arg function", function () {
         var injector = createInjector([]);
-        var fn = function(){};
+        var fn = function () {
+        };
 
         expect(injector.annotate(fn)).toEqual([]);
 
@@ -188,7 +189,8 @@ describe('annotate', function () {
     it("returns annotations parsed from function args when not annotated", function () {
         var injector = createInjector([]);
 
-        var fn = function(a, b){};
+        var fn = function (a, b) {
+        };
 
         expect(injector.annotate(fn)).toEqual(['a', 'b']);
 
@@ -197,7 +199,8 @@ describe('annotate', function () {
     it("strips comments from argument lists when parsing", function () {
         var injector = createInjector([]);
 
-        var fn = function(a, /*b,*/c) {};
+        var fn = function (a, /*b,*/c) {
+        };
         expect(injector.annotate(fn)).toEqual(['a', 'c']);
 
     });
@@ -205,8 +208,9 @@ describe('annotate', function () {
     it("strips // comments from argument lists when parsing", function () {
         var injector = createInjector([]);
 
-        var fn = function(a, //b
-                c ){};
+        var fn = function (a, //b
+                           c) {
+        };
         expect(injector.annotate(fn)).toEqual(['a', 'c']);
 
     });
@@ -214,7 +218,8 @@ describe('annotate', function () {
     it("strips surrouding underscores from argument names when parsing", function () {
         var injector = createInjector([]);
 
-        var fn = function(a, _b_, c_, _d, an_argument){};
+        var fn = function (a, _b_, c_, _d, an_argument) {
+        };
 
         expect(injector.annotate(fn)).toEqual(['a', 'b', 'c', 'd', 'an_argument']);
     });
@@ -222,7 +227,8 @@ describe('annotate', function () {
     it("throws when using a non-annotated fn in strict mode", function () {
         var injector = createInjector([], true);
 
-        var fn = function (a, b, c) {};
+        var fn = function (a, b, c) {
+        };
 
         expect(function () {
             injector.annotate(fn);
@@ -235,7 +241,9 @@ describe('annotate', function () {
         module.constant('b', 2);
         var injector = createInjector(['myModule']);
 
-        var fn = ['a', 'b', function(one, two) { return one + two;}];
+        var fn = ['a', 'b', function (one, two) {
+            return one + two;
+        }];
         expect(injector.invoke(fn)).toBe(3);
     });
 
@@ -245,7 +253,22 @@ describe('annotate', function () {
         module.constant('b', 2);
         var injector = createInjector(['myModule']);
 
-        var fn = function(a, b){ return a +b;};
+        var fn = function (a, b) {
+            return a + b;
+        };
         expect(injector.invoke(fn)).toBe(3);
+    });
+
+    it("allows registering a provider and uses its $get", function () {
+        var module = window.angular.module('myModule', []);
+        module.provider('a', {
+            $get: function () {
+                return 42;
+            }
+        });
+
+        var injector = createInjector(['myModule']);
+        expect(injector.has('a')).toBeTruthy();
+        expect(injector.get('a')).toBe(42);
     });
 });

@@ -17,8 +17,12 @@ function createInjector(modulesToLoad, strictDi) {
                 throw 'hasOwnProperty is not a valid constant name!';
             }
             cache[key] = value;
+        },
+        provider: function(key, provider){
+            cache[key] = provider.$get();
         }
     };
+
 
     function invoke(fn, self, locals){
         var args = _.map(annotate(fn), function (token) {
