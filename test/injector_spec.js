@@ -325,4 +325,23 @@ describe('annotate', function () {
         }).toThrowError(/Circular dependency found/);
 
     });
+
+    it("cleans up the circular marker when instantiation fails", function () {
+        var module = window.angular.module('myModule', []);
+        module.provider('a', {
+            $get: function(){
+                throw  'Failing instantiation';
+            }
+        });
+
+        var injector = createInjector(['myModule']);
+        expect(function () {
+            injector.get('a');
+        }).toThrow('Failing instantiation');
+
+        expect(function () {
+            injector.get('a');
+        }).toThrow('Failing instantiation');
+
+    });
 });
