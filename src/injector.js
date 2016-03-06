@@ -12,6 +12,7 @@ function createInjector(modulesToLoad, strictDi) {
     var providerCache = {};
     var instanceCache = {};
     var loadedModules = {};
+    var path = [];
     strictDi = (strictDi === true);
     var $provide = {
         constant: function(key, value){
@@ -28,11 +29,13 @@ function createInjector(modulesToLoad, strictDi) {
     function getService(name) {
         if(instanceCache.hasOwnProperty(name)){
             if(instanceCache[name] === INSTANTIATING){
-                throw new Error('Circular dependency found');
+                throw new Error('Circular dependency found: ' +
+                name + ' <- ' + path.join(' <- nd'));
             }
             return instanceCache[name];
         }
         else if(providerCache.hasOwnProperty(name+'Provider')){
+            path.unshift(name);
             instanceCache[name] = INSTANTIATING;
 
             try{
@@ -41,6 +44,7 @@ function createInjector(modulesToLoad, strictDi) {
                 instanceCache[name] = instance;
                 return instance;
             } finally {
+                path.shift();
                 if(instanceCache[name] === INSTANTIATING){
                     delete instanceCache[name];
                 }
