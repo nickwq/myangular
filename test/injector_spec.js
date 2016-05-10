@@ -356,6 +356,26 @@ describe('annotate', function () {
         expect(function () {
             injector.get('a');
         }).toThrowError('Circular dependency found: a <- c <- b <- a');
+    });
 
+    it('injects the given provider construction function', function () {
+        var module = window.angular.module('myModule', []);
+        module.provider('a', function AProvider(){
+            this.$get = function() {return 42;};
+        });
+
+        var injector = createInjector(['myModule']);
+        expect(injector.get('a')).toBe(42);
+    });
+
+    it('injects the given provider constructor function', function () {
+        var module = window.angular.module('myModule', []);
+        module.constant('b' , 2);
+        module.provider('a', function AProvider(b) {
+            this.$get = function() { return 1 + b;};
+        });
+
+        var injector = createInjector(['myModule']);
+        expect(injector.get('a')).toBe(3);
     });
 });

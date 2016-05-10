@@ -22,6 +22,9 @@ function createInjector(modulesToLoad, strictDi) {
             instanceCache[key] = value;
         },
         provider: function(key, provider){
+            if(_.isFunction(provider)) {
+                provider = instantiate(provider)
+            }
             providerCache[key + 'Provider'] = provider;
         }
     };
@@ -30,7 +33,7 @@ function createInjector(modulesToLoad, strictDi) {
         if(instanceCache.hasOwnProperty(name)){
             if(instanceCache[name] === INSTANTIATING){
                 throw new Error('Circular dependency found: ' +
-                name + ' <- ' + path.join(' <- nd'));
+                name + ' <- ' + path.join(' <- '));
             }
             return instanceCache[name];
         }
@@ -102,6 +105,13 @@ function createInjector(modulesToLoad, strictDi) {
             });
         }
     }
+
+    function instantiate(Type, locals) {
+        var UnwrappedType = _.isArray(Type) ? _.last(Type) : Type;
+        var instance = Object.create(UnwrappedType.prototype);
+        invoke(Type, instance, locals);
+        return instance;
+    }
     return {
         has: function (key) {
             return providerCache.hasOwnProperty(key + 'Provider') ||
@@ -109,7 +119,8 @@ function createInjector(modulesToLoad, strictDi) {
         },
         get: getService,
         invoke: invoke,
-        annotate: annotate
+        annotate: annotate,
+        instantiate: instantiate
     };
 }
 
