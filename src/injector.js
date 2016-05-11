@@ -37,6 +37,9 @@ function createInjector(modulesToLoad, strictDi) {
             }
             return instanceCache[name];
         }
+        else if (providerCache.hasOwnProperty(name)) {
+            return providerCache[name];
+        }
         else if(providerCache.hasOwnProperty(name+'Provider')){
             path.unshift(name);
             instanceCache[name] = INSTANTIATING;
