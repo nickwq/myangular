@@ -954,7 +954,7 @@ describe('Scope', function () {
         it('does not shadow members of parent scopes attributes', function () {
             var parent = new Scope();
             var child = parent.$new();
-            
+
             parent.user = {name: 'Joe'};
             child.user.name = 'Jill';
 
@@ -1129,7 +1129,7 @@ describe('Scope', function () {
             var parent = new Scope();
             var child = parent.$new(true);
             var child2 = child.$new();
-            
+
             parent.aValue = 'abc';
             parent.counter = 0;
             parent.$watch(
@@ -1140,7 +1140,7 @@ describe('Scope', function () {
                     scope.counter++;
                 }
             );
-            
+
             child2.$evalAsync(function(scope){});
             setTimeout(function () {
                 expect(parent.counter).toBe(1);
@@ -1176,6 +1176,26 @@ describe('Scope', function () {
             parent.$digest();
 
             expect(child.didEvalAsync).toBe(true);
+        });
+
+        it("can take some other scope as the parent", function () {
+          var prototypeParent = new Scope();
+          var hierarchyParent = new Scope();
+          var child = prototypeParent.$new(false, hierarchyParent);
+
+          prototypeParent.a = 42;
+          expect(child.a).toEqual(42);
+
+          child.counter = 0;
+          child.$watch(function(scope){
+            scope.counter++;
+          });
+
+          prototypeParent.$digest();
+          expect(child.counter).toEqual(0);
+
+          hierarchyParent.$digest();
+          expect(child.counter).toEqual(2);
         });
     });
 });
