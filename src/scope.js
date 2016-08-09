@@ -242,14 +242,15 @@ Scope.prototype.$$postDigest = function (fn) {
 Scope.prototype.$new = function (isIsolated, parent) {
     var child;
     parent = parent || this;
-    if(isIsolated){
+    if (isIsolated) {
         child = new Scope();
         child.$root = parent.$root;
         child.$$asyncQueue = parent.$$asyncQueue;
         child.$$postDigestQueue = parent.$$postDigestQueue;
         child.$$applyAsyncQueue = parent.$$applyAsyncQueue;
     } else {
-        var ChildScope = function(){};
+        var ChildScope = function () {
+        };
         ChildScope.prototype = this;
         child = new ChildScope();
     }
@@ -271,15 +272,15 @@ Scope.prototype.$$everyScope = function (fn) {
     }
 };
 
-Scope.prototype.$destroy = function(){
-  if(this.$parent){
-      var siblings = this.$parent.$$children;
-      var indexOfThis = siblings.indexOf(this);
-      if(indexOfThis >= 0){
-          siblings.splice(indexOfThis, 1);
-      }
-      this.$$watchers = null;
-  }
+Scope.prototype.$destroy = function () {
+    if (this.$parent) {
+        var siblings = this.$parent.$$children;
+        var indexOfThis = siblings.indexOf(this);
+        if (indexOfThis >= 0) {
+            siblings.splice(indexOfThis, 1);
+        }
+        this.$$watchers = null;
+    }
 };
 
 Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
@@ -291,25 +292,30 @@ Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
     var internalWatchFn = function (scope) {
         newValue = watchFn(scope);
 
-        if(_.isObject(newValue)){
-            if(_.isArray(newValue)){
-                if(!_.isArray(oldValue)){
+        if (_.isObject(newValue)) {
+            if (_.isArray(newValue)) {
+                if (!_.isArray(oldValue)) {
                     changeCount++;
-                    oldValue=[];
+                    oldValue = [];
+                }
+                if (newValue.length !== oldValue.length) {
+                    console.log('here', newValue);
+                    changeCount++;
+                    oldValue.length = newValue.length;
                 }
             }
-            else{}
+            else {
+            }
         } else {
             if (!self.$$areEqual(newValue, oldValue, false)) {
                 changeCount++;
             }
+            oldValue = newValue;
         }
-        oldValue = newValue;
-
         return changeCount;
     };
 
-    var internalListenerFn = function(){
+    var internalListenerFn = function () {
         listenerFn(newValue, oldValue, self);
     };
 
