@@ -299,10 +299,15 @@ Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
                     oldValue = [];
                 }
                 if (newValue.length !== oldValue.length) {
-                    console.log('here', newValue);
                     changeCount++;
                     oldValue.length = newValue.length;
                 }
+                _.forEach(newValue, function (value, index) {
+                    if (value !== oldValue[index]) {
+                        changeCount++;
+                        oldValue[index] = value;
+                    }
+                });
             }
             else {
             }

@@ -1351,5 +1351,28 @@ describe('Scope', function () {
             scope.$digest();
             expect(scope.counter).toBe(2);
         });
+
+        it('notices an item replaces in an array', function () {
+            scope.arr = [1,2, 3];
+            scope.counter = 0;
+            scope.$watchCollection(
+                function (scope) {
+                    return scope.arr;
+                },
+                function (newValue, oldValue, scope) {
+                    scope.counter++;
+                }
+            );
+
+            scope.$digest();
+            expect(scope.counter).toBe(1);
+
+            scope.arr[1] = 42;
+            scope.$digest();
+            expect(scope.counter).toBe(2);
+
+            scope.$digest();
+            expect(scope.counter).toBe(2);
+        });
     });
 });
