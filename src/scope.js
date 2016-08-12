@@ -293,7 +293,7 @@ Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
         newValue = watchFn(scope);
 
         if (_.isObject(newValue)) {
-            if (_.isArray(newValue)) {
+            if (_.isArray(newValue) || isArrayLike(newValue)) {
                 if (!_.isArray(oldValue)) {
                     changeCount++;
                     oldValue = [];
@@ -319,6 +319,14 @@ Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
         }
         return changeCount;
     };
+
+    function isArrayLike(obj) {
+        if (_.isNull(obj) || _.isUndefined(obj)) {
+            return false;
+        }
+        var length = obj.length;
+        return _.isNumber(length);
+    }
 
     var internalListenerFn = function () {
         listenerFn(newValue, oldValue, self);
