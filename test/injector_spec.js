@@ -321,7 +321,7 @@ describe('annotate', function () {
 
         var injector = createInjector(['myModule']);
         expect(function () {
-            injector.get('a')
+            injector.get('a');
         }).toThrowError(/Circular dependency found/);
 
     });

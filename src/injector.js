@@ -23,7 +23,7 @@ function createInjector(modulesToLoad, strictDi) {
         },
         provider: function(key, provider){
             if(_.isFunction(provider)) {
-                provider = instantiate(provider)
+                provider = instantiate(provider);
             }
             providerCache[key + 'Provider'] = provider;
         }
