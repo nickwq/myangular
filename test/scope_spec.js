@@ -1508,8 +1508,25 @@ describe('Scope', function () {
             expect(scope.counter).toBe(2);
         });
 
-        it('', function () {
-            
+        it('does not consider any object with a length property as an array', function () {
+            scope.object = {length:42, otherKey: 'abc'};
+            scope.counter = 0;
+
+            scope.$watchCollection(
+                function(scope) {
+                    return scope.object;
+                },
+                function (newValue, oldValue, scope) {
+                    scope.counter++;
+                }
+            );
+
+            scope.$digest();
+            expect(scope.counter).toBe(1);
+
+            scope.object.newKey = 'def';
+            scope.$digest();
+            expect(scope.counter).toBe(2);
         });
     });
 });

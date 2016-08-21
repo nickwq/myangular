@@ -359,7 +359,8 @@ Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
             return false;
         }
         var length = obj.length;
-        return _.isNumber(length);
+        return length === 0 ||
+            (_.isNumber(length) && length > 0 && (length - 1) in obj);
     }
 
     var internalListenerFn = function () {
