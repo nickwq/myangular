@@ -287,6 +287,8 @@ Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
     var self = this;
     var newValue;
     var oldValue;
+    var originalOldValue;
+    var trackOriginalOldValue = (listenerFn.length>1);
     var oldLength;
     var changeCount = 0;
 
@@ -364,7 +366,11 @@ Scope.prototype.$watchCollection = function (watchFn, listenerFn) {
     }
 
     var internalListenerFn = function () {
-        listenerFn(newValue, oldValue, self);
+        listenerFn(newValue, originalOldValue, self);
+
+        if(trackOriginalOldValue) {
+            originalOldValue = _.clone(newValue);
+        }
     };
 
     return this.$watch(internalWatchFn, internalListenerFn);
