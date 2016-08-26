@@ -190,6 +190,9 @@ function parse(expr) {
         var elements = [];
         if(!this.peek(']')){
             do{
+                if(this.peek(']')){
+                    break;
+                }
                 elements.push(this.primary());
             }while(this.expect(','));
         }
