@@ -171,6 +171,7 @@ function parse(expr) {
     AST.Literal = 'Literal';
     AST.ArrayExpression = 'ArrayExpression';
     AST.ObjectExpression = 'ObjectExpression';
+    AST.Property = 'Property';
 
     AST.prototype.ast = function (text) {
         this.tokens = this.lexer.lex(text);
@@ -194,8 +195,18 @@ function parse(expr) {
     };
 
     AST.prototype.object = function(){
+        var properties = [];
+        if(!this.peek('}')){
+            do {
+                var property = {type: AST.Property};
+                property.key = this.constant();
+                this.consume(':');
+                property.value = this.primary();
+                properties.push(property);
+            }while(this.expect(','));
+        }
         this.consume('}');
-        return {type: AST.ObjectExpression};
+        return {type: AST.ObjectExpression, properties: properties};
     };
 
     AST.prototype.arrayDeclaration = function () {
@@ -262,7 +273,12 @@ function parse(expr) {
                 }, this);
                 return '[' + elements.join(',') + ']';
             case AST.ObjectExpression:
-                return '{}';
+                var properties = _.map(ast.properties, _.bind(function (property) {
+                    var key = this.escape(property.key.value);
+                    var value = this.recurse(property.value);
+                    return key + ':' + value;
+                }, this));
+                return '{' + properties.join(',') + '}';
         }
     };
 
