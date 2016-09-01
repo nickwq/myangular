@@ -148,4 +148,9 @@ describe('parse', function () {
         expect(fn({aKey: 42})).toBe(42);
         expect(fn({})).toBeUndefined();
     });
+
+    it('returns undefuned when looking up attribute from undefined', function () {
+        var fn = parse('akey');
+        expect(fn()).toBeUndefined();
+    });
 });
