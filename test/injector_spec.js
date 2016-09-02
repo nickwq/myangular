@@ -396,4 +396,60 @@ describe('annotate', function () {
         var injector = createInjector(['myModule']);
         expect(injector.get('a')).toBe(2);
     });
+
+    it('does not inject an instance to a provider constructor function', function () {
+        var module = window.angular.module('myModule', []);
+
+        module.provider('a', function AProvider(){
+            this.$get = function(){ return 1;};
+        });
+
+        module.provider('b', function BProvider(a){
+            this.$get = function() { return a; };
+        });
+
+        expect(function(){
+            createInjector(['myModule']);
+        }).toThrow();
+    });
+
+    it('does not inject provider to a $get function', function () {
+        var module = window.angular.module('myModule', []);
+
+        module.provider('a', function AProvider(){
+            this.$get = function(){ return 1;};
+        });
+
+        module.provider('b', function BProvider(){
+            this.$get = function(aProvider) { return aProvider.$get(); };
+        });
+
+        var injector = createInjector(['myModule']);
+        expect(function(){
+            injector.get(b);
+        }).toThrow();
+    });
+
+    it('does not inject a provider to invoke', function () {
+        var module = window.angular.module('myModule', []);
+
+        module.provider('a', function AProvider(){
+            this.$get = function () {
+                return 1;
+            };
+        });
+        var injector = createInjector(['myModule']);
+        expect( function () {injector.get('aProvider');}).toThrow();
+    });
+
+    it('does not give access to providers through get', function() {
+        var module = window.angular.module('myModule', []);
+        module.provider('a', function AProvider() {
+            this.$get = function() { return 1; };
+        });
+        var injector = createInjector(['myModule']);
+        expect(function() {
+            injector.get('aProvider');
+        }).toThrow();
+    });
 });
