@@ -463,4 +463,20 @@ describe('annotate', function () {
         var injector = createInjector(['myModule']);
         expect(injector.get('a')).toBe(42);
     });
+
+    it('allows inject the injector instance to $get', function () {
+        var module = window.angular.module('myModule', []);
+
+        module.constant('a', 42);
+
+        module.provider('b', function BProvider(){
+            this.$get = function ($injector) {
+                return $injector.get('a');
+            }
+        });
+
+        var injector = createInjector(['myModule']);
+        expect(injector.get('b')).toBe(42);
+    });
+
 });
