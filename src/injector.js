@@ -10,7 +10,8 @@ var INSTANTIATING = {};
 
 function createInjector(modulesToLoad, strictDi) {
     var providerCache = {};
-    var providerInjector = createInternalInjector(providerCache, function() {
+    var providerInjector = providerCache.$injector =
+        createInternalInjector(providerCache, function() {
         throw 'Unknown provider: '+path.join(' <- ');
     });
     var instanceCache = {};
