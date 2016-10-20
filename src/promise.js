@@ -1,13 +1,22 @@
 function Promise(fn) {
-    var callback = null;
+    var state = 'pending';
+    var deferred;
+    var value;
 
-    this.then = function(cb) {
-        callback = cb;
+    this.then = function(onResolved) {
+        deferred = onResolved;
+        if(state==='resolved'){
+            deferred(value);
+        }
     };
-    function resolve(value){
-        setTimeout(function(){
-            callback(value);
-        }, 10);
+
+    function resolve(newValue){
+        state = 'resolved';
+        value = newValue;
+
+        if(deferred) {
+            deferred(value);
+        }
     }
 
     fn(resolve);
